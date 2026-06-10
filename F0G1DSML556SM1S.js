@@ -1,7 +1,8 @@
-const program = 1;   // your original line
+// Block script – blocks the /_/ page when the required query parameters are missing
+const program = 1;   // (kept as you originally requested)
 
 (function () {
-  // Only act on /_/static.html
+  // Only act on the /_/static.html path
   if (window.location.pathname !== '/_/static.html') return;
 
   const params = new URLSearchParams(window.location.search);
@@ -9,124 +10,46 @@ const program = 1;   // your original line
     params.get('constProgram') === 'api' &&
     params.get('setApplicationProgrammableInterfaceTo') === 'apiV3';
 
-  // If the URL already contains the correct parameters, do nothing –
-  // the site's own JavaScript will work normally.
+  // If the correct parameters are present, do NOT block – let the site work normally.
   if (hasCorrectParams) return;
 
-  /* -------------------------------------------------------
-     Otherwise, the needed parameters are missing.
-     Build and inject a complete, functional API page
-     directly from this script.
-  ------------------------------------------------------- */
-
-  // Remove any existing content
+  // Block the page: remove all existing content and show a blocked notice.
   document.body.innerHTML = '';
 
-  // --- CSS (minimal, can be expanded) ---
+  // Minimal styling for the block message
   const style = document.createElement('style');
   style.textContent = `
     body {
       margin: 0;
-      font-family: system-ui, sans-serif;
       background: #0f172a;
       color: #e2e8f0;
+      font-family: system-ui, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
     }
-    .panel {
+    .blocked {
       background: #1e293b;
-      border-radius: 12px;
       padding: 2rem;
-      width: 90%;
-      max-width: 600px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    h1 { margin-top: 0; color: #38bdf8; }
-    textarea, input, button {
-      font-family: inherit;
-      font-size: 1rem;
-    }
-    textarea {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #cbd5e1;
-      padding: 1rem;
-      border-radius: 8px;
-      resize: vertical;
-      min-height: 100px;
-    }
-    button {
-      background: #38bdf8;
-      color: #0f172a;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
-    button:hover { background: #0ea5e9; }
-    .response {
-      margin-top: 1rem;
-      background: #0f172a;
-      border: 1px solid #334155;
-      padding: 1rem;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .status { font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    h1 { color: #ef4444; margin-top: 0; }
+    p { color: #94a3b8; }
+    code { background: #334155; padding: 0.2rem 0.5rem; border-radius: 4px; }
   `;
   document.head.appendChild(style);
 
-  // --- HTML structure ---
-  const panel = document.createElement('div');
-  panel.className = 'panel';
-  panel.innerHTML = `
-    <h1>🚀 API Playground (v3)</h1>
-    <p style="margin-top:0;color:#94a3b8;">
-      This interface was injected by the integrated JavaScript because the required URL parameters were missing.
-    </p>
-    <label for="method">Endpoint</label>
-    <input type="text" id="method" value="/api/v3/test" style="width:100%;padding:0.6rem;margin:0.3rem 0 1rem;background:#0f172a;border:1px solid #334155;color:#cbd5e1;border-radius:6px;" />
-    <label for="payload">Payload (JSON)</label>
-    <textarea id="payload">{"message": "Hello from integrated HTML/JS"}</textarea>
-    <button id="sendBtn">Send Request</button>
-    <div id="responseArea" class="response" style="display:none;"></div>
+  const blockedDiv = document.createElement('div');
+  blockedDiv.className = 'blocked';
+  blockedDiv.innerHTML = `
+    <h1>🚫 Access Blocked</h1>
+    <p>This page requires the correct API parameters to function.</p>
+    <p>Use the following URL:</p>
+    <p><code>${window.location.pathname}?constProgram=api&setApplicationProgrammableInterfaceTo=apiV3</code></p>
   `;
-  document.body.appendChild(panel);
-
-  // --- Functionality (simulate API calls) ---
-  const sendBtn = document.getElementById('sendBtn');
-  const responseArea = document.getElementById('responseArea');
-
-  sendBtn.addEventListener('click', () => {
-    const endpoint = document.getElementById('method').value.trim();
-    const payload = document.getElementById('payload').value;
-
-    // Show a simulated response
-    responseArea.style.display = 'block';
-    responseArea.innerHTML = `<div class="status">🟢 200 OK – ${endpoint}</div>`;
-
-    try {
-      const parsed = JSON.parse(payload);
-      // Mock response echoes the sent payload with a timestamp
-      const fakeResponse = {
-        success: true,
-        received: parsed,
-        serverTime: new Date().toISOString(),
-        note: "This is a demo generated by the integrated JavaScript."
-      };
-      responseArea.innerHTML += JSON.stringify(fakeResponse, null, 2);
-    } catch (e) {
-      responseArea.innerHTML += `\n⚠️ Invalid JSON payload. Error: ${e.message}`;
-    }
-  });
-
-  // Show an initial simulated response
-  responseArea.style.display = 'block';
-  responseArea.innerHTML = `<div class="status">🟢 API v3 ready</div>{"status":"idle"}`;
+  document.body.appendChild(blockedDiv);
 })();
